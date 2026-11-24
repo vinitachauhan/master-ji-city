@@ -7,3 +7,4 @@ admin/dist
 
 .vercel
 .env*
+!.env.local.example
