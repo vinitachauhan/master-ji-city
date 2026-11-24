@@ -7,11 +7,14 @@ import StarBank from '@/components/StarBank';
 import Quiz from '@/components/Quiz';
 import PictureCards from '@/components/PictureCards';
 import { speak } from '@/components/speech';
+import dynamic from 'next/dynamic';
+
+const PaintPad = dynamic(() => import('@/components/lab/PaintPad'), { ssr: false });
 
 const CLASSES = ['Play School', 'Nursery', 'KG', '1', '2', '3', '4', '5', '6', '7', '8'];
 const SUBJECTS = [
   ['Hindi', '🅰️', 'bg-orange-300'], ['English', '🔤', 'bg-sky-300'], ['Maths', '➕', 'bg-yellow-300'],
-  ['Science', '🔬', 'bg-green-300'], ['SST', '🌍', 'bg-pink-300'], ['Computer', '💻', 'bg-violet-300'], ['Sanskrit', '🕉️', 'bg-amber-300'],
+  ['Science', '🔬', 'bg-green-300'], ['SST', '🌍', 'bg-pink-300'], ['Computer', '💻', 'bg-violet-300'], ['Sanskrit', '🕉️', 'bg-amber-300'], ['Drawing', '🎨', 'bg-rose-300'],
 ];
 const TABS = [['notes', '📒 Notes'], ['example', '🏙️ Example'], ['questions', '❓ Practice Questions'], ['test', '📝 Test - 10 Questions (+⭐)']];
 const label = (c) => (/^\d+$/.test(c) ? `Class ${c}` : c);
@@ -61,7 +64,7 @@ export default function Study18() {
         {cls && (
           <section className="mt-6">
             <h2 className="text-2xl font-extrabold text-sky-700">2️⃣ Choose a Subject</h2>
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
               {SUBJECTS.map(([s, e, bg]) => (
                 <button key={s} onClick={() => setSubject(s)}
                   className={`rounded-3xl border-4 p-4 text-center shadow-pop transition active:translate-y-1 ${subject === s ? 'border-slate-900 scale-105' : 'border-white'} ${bg}`}>
@@ -108,6 +111,16 @@ export default function Study18() {
                       <p className="whitespace-pre-line">{ch.notes}</p>
                       <button onClick={() => speak(ch.notes)} className="mt-3 rounded-full bg-pink-500 px-4 py-2 text-base font-bold text-white">🔊 Listen to Master Ji</button>
                     </div>
+                  )}
+                  {tab === 'notes' && subject === 'Drawing' && (
+                    <div className="mt-6">
+                      <p className="mb-2 text-xl font-extrabold text-pink-600">✏️ Now draw it yourself here!</p>
+                      <PaintPad key={`${cls}-${ch.chapterNo}`} compact />
+                    </div>
+                  )}
+                  {tab === 'notes' && subject === 'Computer' && (
+                    <Link href={`/computer-lab?level=${encodeURIComponent(['Play School', 'Nursery', 'KG'].includes(cls) ? cls : Number(cls) <= 2 ? 'Class 1-2' : Number(cls) <= 5 ? 'Class 3-5' : 'Class 6-8')}`}
+                      className="mt-4 inline-block rounded-full bg-violet-600 px-5 py-2 text-lg font-extrabold text-white hover:bg-violet-700">🖥️ Practise it in the Computer Lab - Paint, Notepad, WordPad, Excel, Typing →</Link>
                   )}
                   {tab === 'notes' && ch.pictures?.length > 0 && (
                     <div className="mt-6">

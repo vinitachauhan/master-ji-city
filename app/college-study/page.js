@@ -1,10 +1,13 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { COURSES } from '@/lib/data/college.mjs';
+import { COURSES, READY_COURSES } from '@/lib/data/college.mjs';
 
 const SEMS = [1, 2, 3, 4, 5, 6];
 const TABS = [['units', '📑 Units & Notes'], ['imp', '❗ Important Qs'], ['pyq', '🕘 Previous Year'], ['plan', '🗓️ Study Plan'], ['jobs', '💼 Jobs']];
+// Cooking Classes and Computer Courses are practical courses, so their tabs have practical names.
+const COOK_TABS = [['units', '🍳 Recipes'], ['imp', '💡 Tips & Safety'], ['pyq', '🧑‍🍳 Practice'], ['plan', '🗓️ How to Practise'], ['jobs', '💼 Earn from Cooking']];
+const PRACTICAL_TABS = [['units', '📑 Lessons'], ['imp', '❗ Important Qs'], ['pyq', '🖱️ Practicals'], ['plan', '🗓️ Practice Plan'], ['jobs', '💼 Jobs']];
 
 export default function CollegeStudy() {
   const [course, setCourse] = useState('B.Tech');
@@ -19,10 +22,21 @@ export default function CollegeStudy() {
 
   const info = COURSES.find((c) => c.course === course);
 
+  // open a course directly from a link, e.g. /college-study?course=Cooking%20Classes
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get('course');
+    const found = COURSES.find((x) => x.course === c);
+    if (found) { setCourse(found.course); setBranch(found.branches[0] || ''); }
+  }, []);
+  const isCooking = course === 'Cooking Classes';
+  const tabs = isCooking ? COOK_TABS : course === 'Computer Courses' ? PRACTICAL_TABS : TABS;
+
   useEffect(() => {
     setSubject(''); setData(null);
+    let current = true; // ignore an older answer if the course was changed meanwhile
     fetch(`/api/college-study?course=${encodeURIComponent(course)}&semester=${sem}`)
-      .then((r) => r.json()).then((d) => { setSubjects(d.subjects || []); setCourseJobs(d.courseJobs || ''); });
+      .then((r) => r.json()).then((d) => { if (current) { setSubjects(d.subjects || []); setCourseJobs(d.courseJobs || ''); } });
+    return () => { current = false; };
   }, [course, sem]);
 
   useEffect(() => {
@@ -76,7 +90,7 @@ export default function CollegeStudy() {
           {subjects.length === 0 ? (
             <div className="mt-2 rounded-xl border border-white/15 bg-navy-800 p-5">
               <p className="font-semibold">⏳ {course}{branch ? ` (${branch})` : ''} - Semester {sem} data is being added soon.</p>
-              <p className="mt-1 text-slate-300">Ready now: B.Tech, B.Com, B.A. - Semester 1. You can add any subject by inserting new units into the <code className="text-neon">collegeStudy</code> collection in MongoDB.</p>
+              <p className="mt-1 text-slate-300">Ready now (Semester 1): {READY_COURSES.join(', ')}. More semesters can be added from the Admin Panel (College Study).</p>
               {courseJobs && <p className="mt-3"><b className="text-neon">💼 {course} - jobs after this course:</b> {courseJobs}</p>}
             </div>
           ) : (
@@ -97,10 +111,10 @@ export default function CollegeStudy() {
         {data && (
           <section className="mt-6 overflow-hidden rounded-2xl border border-white/15 bg-white text-slate-900">
             <div className="bg-navy-800 p-5 text-white">
-              <p className="text-sm text-neon">{course}{branch ? ` ${branch}` : ''} · Semester {sem}</p>
+              <p className="text-sm text-neon">{course}{branch ? ` ${branch}` : ''}{isCooking ? '' : ` · Semester ${sem}`}</p>
               <h2 className="text-2xl font-extrabold">{data.subjectTitle}</h2>
               <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
-                {TABS.map(([k, t]) => (
+                {tabs.map(([k, t]) => (
                   <button key={k} onClick={() => setTab(k)} className={`shrink-0 rounded-lg px-3 py-2 text-sm font-bold ${tab === k ? 'bg-neon text-navy-900' : 'bg-white/10 hover:bg-white/20'}`}>{t}</button>
                 ))}
               </div>
@@ -113,7 +127,7 @@ export default function CollegeStudy() {
                       <button onClick={() => setOpenUnit(openUnit === u.unitNo ? 0 : u.unitNo)} className="flex w-full items-center justify-between p-4 text-left font-bold">
                         {u.unitName} <span className="text-slate-400">{openUnit === u.unitNo ? '−' : '+'}</span>
                       </button>
-                      {openUnit === u.unitNo && <p className="border-t border-slate-200 bg-slate-50 p-4 leading-relaxed">{u.notes}</p>}
+                      {openUnit === u.unitNo && <p className="whitespace-pre-line border-t border-slate-200 bg-slate-50 p-4 leading-relaxed">{u.notes}</p>}
                     </div>
                   ))}
                 </div>
@@ -126,7 +140,7 @@ export default function CollegeStudy() {
               ))}
               {tab === 'pyq' && (
                 <>
-                  <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Questions follow the university exam pattern. Also check the real past papers of your university (AKTU / CCSU / DU).</p>
+                  <p className="mb-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">{isCooking ? 'Cook it yourself at home with an adult, then try the practice task below.' : course === 'Computer Courses' ? 'Do these practicals yourself - try them in the 🖥️ Computer Lab of this website or on a real computer.' : 'Questions follow the university exam pattern. Also check the real past papers of your university (AKTU / CCSU / DU).'}</p>
                   {data.units.map((u) => (
                     <div key={u.unitNo} className="mb-4">
                       <h3 className="font-bold text-navy-700">{u.unitName}</h3>
@@ -137,13 +151,21 @@ export default function CollegeStudy() {
               )}
               {tab === 'plan' && (
                 <div className="rounded-xl border-2 border-green-400 bg-green-50 p-5">
-                  <h3 className="text-lg font-bold">How to study this subject? How many hours a day?</h3>
+                  <h3 className="text-lg font-bold">{isCooking ? 'How to practise these recipes?' : 'How to study this subject? How many hours a day?'}</h3>
                   <p className="mt-2">{data.studyPlan}</p>
-                  <ul className="mt-3 list-disc pl-5 text-sm text-slate-700">
-                    <li>Write a 1-page summary after every unit.</li>
-                    <li>3 weeks before the exam: important questions; 2 weeks before: previous year papers.</li>
-                    <li>Free help: videos on this subject on NPTEL / SWAYAM.</li>
-                  </ul>
+                  {isCooking ? (
+                    <ul className="mt-3 list-disc pl-5 text-sm text-slate-700">
+                      <li>Children cook only with an adult. Wash hands, tie hair, wear an apron.</li>
+                      <li>Read the full recipe and keep all ingredients ready before switching on the gas.</li>
+                      <li>Clean - Cut - Cook - Clean: leave the kitchen clean and switch off the gas.</li>
+                    </ul>
+                  ) : (
+                    <ul className="mt-3 list-disc pl-5 text-sm text-slate-700">
+                      <li>Write a 1-page summary after every unit.</li>
+                      <li>3 weeks before the exam: important questions; 2 weeks before: previous year papers.</li>
+                      <li>Free help: videos on this subject on NPTEL / SWAYAM.</li>
+                    </ul>
+                  )}
                 </div>
               )}
               {tab === 'jobs' && (

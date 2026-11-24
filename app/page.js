@@ -5,7 +5,7 @@ const BUTTONS = [
   { href: '/study-1-8', emoji: '📚', title: 'Play School to Class 8', sub: 'COMPLETE Study', hint: 'Notes, Examples, Tests, Stars ⭐', cls: 'from-yellow-300 via-pink-300 to-sky-300 text-slate-900' },
   { href: '/study-9-12', emoji: '🧠', title: 'Class 9 to 12', sub: 'COMPLETE Study + Best Subject Test', hint: 'Board notes, formulas, past-paper questions, 10 MCQ', cls: 'from-blue-600 to-green-500 text-white' },
   { href: '/study-9-12/stream', emoji: '🎯', title: 'Class 11-12 Stream Selector', sub: 'PCM / PCB / Commerce / Arts', hint: 'Which stream is best for you?', cls: 'from-emerald-500 to-teal-600 text-white' },
-  { href: '/college-study', emoji: '🎓', title: 'College COMPLETE Study', sub: 'Any Subject', hint: 'B.Tech, B.Com, B.A., BCA, Nursing...', cls: 'from-navy-900 to-navy-700 text-white ring-2 ring-neon/60' },
+  { href: '/college-study', emoji: '🎓', title: 'College COMPLETE Study', sub: 'Any Subject', hint: '20 courses: B.Tech, MBBS, BCA, Nursing, ITI, Computer Courses, Cooking...', cls: 'from-navy-900 to-navy-700 text-white ring-2 ring-neon/60' },
 ];
 
 export default function Home() {
@@ -50,6 +50,21 @@ export default function Home() {
         ))}
       </section>
 
+      <section className="mt-4 grid gap-4 sm:grid-cols-3">
+        {[
+          ['/computer-lab', '🖥️', 'Computer Lab', 'Do it yourself: Paint, Notepad, WordPad, Excel, Typing, HTML coding', 'from-violet-500 to-sky-500 text-white'],
+          ['/study-1-8', '🎨', 'Drawing Classes', 'Play School to Class 8 - step-by-step drawing + draw on screen', 'from-rose-300 via-orange-200 to-yellow-200 text-slate-900'],
+          ['/college-study?course=Cooking%20Classes', '🍳', 'Cooking Classes', 'Breakfast, North & South Indian, snacks, sweets, baking, Chinese, kids tiffin', 'from-orange-500 to-red-500 text-white'],
+        ].map(([href, e, t, s, cls]) => (
+          <Link key={t} href={href} className={`rounded-3xl bg-gradient-to-br p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-2xl ${cls}`}>
+            <div className="text-5xl">{e}</div>
+            <h2 className="mt-2 text-2xl font-extrabold">{t}</h2>
+            <p className="mt-1 opacity-90">{s}</p>
+            <span className="mt-3 inline-block rounded-full bg-white/90 px-4 py-2 font-bold text-slate-900">Open →</span>
+          </Link>
+        ))}
+      </section>
+
       <Link href="/school" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-indigo-200 bg-white p-6 shadow-sm transition hover:border-indigo-500 hover:shadow-lg">
         <div>
           <p className="text-3xl">🏫</p>
@@ -60,7 +75,7 @@ export default function Home() {
       </Link>
 
       <section className="mt-10 grid gap-4 text-center sm:grid-cols-4">
-        {[['📖', '500+ Chapters', 'Play School to Class 12'], ['🎤', 'Bolo Master', 'Ask with your voice'], ['📊', 'Best Subject Test', 'Bar graph result'], ['🏫', 'College Guide', 'Delhi · Noida · Bulandshahr']].map(([e, t, s]) => (
+        {[['📖', '1500+ Chapters', 'Play School to Class 12'], ['🎤', 'Bolo Master', 'Ask with your voice'], ['📊', 'Best Subject Test', 'Bar graph result'], ['🏫', 'College Guide', 'Delhi · Noida · Bulandshahr']].map(([e, t, s]) => (
           <div key={t} className="rounded-2xl bg-white p-5 shadow-sm border border-slate-200">
             <div className="text-3xl">{e}</div>
             <div className="mt-1 font-bold">{t}</div>
