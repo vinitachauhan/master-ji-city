@@ -6,7 +6,7 @@ import { api } from './api';
 export const NAV = [
   { group: 'Overview', items: [['/', '📊', 'Dashboard', 'dashboard'], ['/reports', '📈', 'Reports', 'reports']] },
   { group: 'People', items: [['/students', '🎒', 'Students', 'students'], ['/teachers', '👩‍🏫', 'Teachers & Staff', 'teachers'], ['/schools', '🏫', 'Schools', 'schools']] },
-  { group: 'Academics', items: [['/classes', '🏷️', 'Classes', 'classes'], ['/subjects', '📚', 'Subjects', 'subjects'], ['/materials', '📒', 'Study Materials', 'materials'], ['/tests', '📝', 'Tests & Results', 'tests'], ['/doubts', '🤖', 'Doubts', 'doubts'], ['/certificates', '🏆', 'Certificates', 'certificates']] },
+  { group: 'Academics', items: [['/sections', '🏷️', 'Classes & Sections', 'classes'], ['/subjects', '📚', 'Subjects', 'subjects'], ['/materials', '📒', 'Study Materials', 'materials'], ['/tests', '📝', 'Tests & Results', 'tests'], ['/doubts', '🤖', 'Doubts', 'doubts'], ['/certificates', '🏆', 'Certificates', 'certificates']] },
   { group: 'Communication', items: [['/notifications', '📣', 'Notifications', 'notifications']] },
   { group: 'Administration', items: [['/users', '👤', 'Admin Users', 'users'], ['/roles', '🔐', 'Roles & Permissions', 'roles'], ['/settings', '⚙️', 'Website Settings', 'settings'], ['/logs', '🧾', 'Activity Logs', 'logs']] },
 ];

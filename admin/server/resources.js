@@ -6,7 +6,7 @@ import { randomBytes } from 'node:crypto';
 import { newId } from './core.js';
 
 export const CLASS_LIST = ['Play School', 'Nursery', 'KG', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-const SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F'];
+export const SECTIONS = ['A', 'B', 'C', 'D', 'E', 'F'];
 const APT_SUBJECTS = ['Maths', 'Science', 'English', 'SST', 'Reasoning', 'Interest'];
 
 // field helpers
@@ -55,11 +55,37 @@ export const RESOURCES_CONFIG = {
   classes: {
     label: 'Classes', collection: 'classes', keyFields: ['id'], perm: 'classes', icon: '🏷️',
     fields: {
-      name: text('Class name', { required: true, max: 40 }), level: pick('Level', ['Play School - 8', '9 - 12', 'College'], { required: true }),
-      sections: lines('Sections (one per line)', { default: ['A'] }), order: num('Display order', { min: 0 }),
-      classTeacherId: { type: 'ref', ref: 'teachers', label: 'Class teacher' },
+      classKey: pick('Class', CLASS_LIST, { required: true, immutable: true, help: 'Matches the class used for students and on the website' }),
+      name: text('Display name', { required: true, max: 40 }), level: pick('Level', ['Play School - 8', '9 - 12', 'College'], { required: true }),
+      sections: lines('Sections (one per line, e.g. A, B, C)', { default: ['A'] }), order: num('Display order', { min: 0 }),
+      classTeacherId: { type: 'ref', ref: 'teachers', label: 'Class in-charge' },
     },
-    columns: ['name', 'level', 'sections', 'order'], search: ['name'], filters: ['level'], sort: 'order',
+    columns: ['name', 'classKey', 'level', 'sections', 'order'], search: ['name'], filters: ['level'], sort: 'order', unique: ['classKey'],
+    beforeCreate: (d) => ({ id: newId(), ...d }),
+    validate: (d) => (d.sections || []).some((s) => !SECTIONS.includes(s)) ? `Sections must be letters ${SECTIONS[0]}-${SECTIONS[SECTIONS.length - 1]}` : null,
+  },
+
+  // ---------- per-section management ----------
+  sectionTeachers: {
+    label: 'Section teachers', collection: 'sectionTeachers', keyFields: ['id'], perm: 'teachers', icon: '🧑‍🏫',
+    fields: {
+      class: pick('Class', CLASS_LIST, { required: true }), section: pick('Section', SECTIONS, { required: true }),
+      teacherId: { type: 'ref', ref: 'teachers', label: 'Teacher', required: true }, subject: text('Subject taught', { max: 60 }),
+      isClassTeacher: bool('Class teacher of this section'),
+    },
+    columns: ['teacherId', 'subject', 'isClassTeacher', 'class', 'section'], search: ['subject'], filters: ['class', 'section'], sort: 'subject',
+    beforeCreate: (d) => ({ id: newId(), ...d }),
+  },
+  sectionMaterials: {
+    label: 'Section study materials', collection: 'sectionMaterials', keyFields: ['id'], perm: 'materials', icon: '📎',
+    fields: {
+      class: pick('Class', CLASS_LIST, { required: true }), section: pick('Section', SECTIONS, { required: true }),
+      subject: text('Subject', { required: true, max: 60 }), title: text('Title', { required: true, max: 150 }),
+      type: pick('Type', ['Notes', 'Homework', 'Assignment', 'Worksheet', 'Video link', 'Other'], { default: 'Notes' }),
+      description: long('Details / instructions', { max: 5000 }), link: text('Link (optional, https://...)', { max: 500, format: 'url' }),
+      dueDate: date('Due date (for homework)'), active: bool('Visible to the section', { default: true }),
+    },
+    columns: ['title', 'subject', 'type', 'dueDate', 'active'], search: ['title', 'subject', 'description'], filters: ['class', 'section', 'type'], sort: '-createdAt',
     beforeCreate: (d) => ({ id: newId(), ...d }),
   },
   subjects: {

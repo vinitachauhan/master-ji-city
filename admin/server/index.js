@@ -9,7 +9,7 @@ import {
 } from './core.js';
 import { find, insertOne, upsert, remove, source } from '../../lib/db.mjs';
 import { mountCrud, logActivity } from './crud.js';
-import { resourceMeta } from './resources.js';
+import { resourceMeta, CLASS_LIST, SECTIONS } from './resources.js';
 
 const PORT = Number(process.env.ADMIN_PORT || 5050);
 const app = express();
@@ -33,6 +33,12 @@ for (const m of ['get', 'post', 'put', 'delete']) {
   const orig = api[m].bind(api);
   api[m] = (p, ...handlers) => orig(p, ...handlers.map((h) => (h.length === 4 ? h : wrap(h))));
 }
+
+// In production the panel only runs on the real database (never on temporary built-in data)
+api.use(async (req, res, next) => {
+  if (IS_PROD && (await source()) !== 'mongodb') return res.status(503).json({ error: 'Database not connected - set MONGODB_URI for the admin panel.' });
+  next();
+});
 
 // CSRF protection: every state-changing request must carry our custom header (browsers cannot add it cross-site)
 api.use((req, res, next) => {
@@ -326,6 +332,84 @@ api.get('/my-notices', requireAuth, async (req, res) => {
   res.json({ rows: rows.slice(0, 10) });
 });
 
+// ---------- Classes & Sections ----------
+const classOrder = (k) => CLASS_LIST.indexOf(k);
+const levelOf = (k) => (classOrder(k) <= classOrder('8') ? 'Play School - 8' : '9 - 12');
+const classDisplay = (k) => (/^\d+$/.test(k) ? `Class ${k}` : k);
+
+async function classDoc(classKey) {
+  const [doc] = await find('classes', { classKey });
+  return doc || null;
+}
+
+// Every class with its sections and how many students / teachers / materials each section has
+api.get('/sections/overview', requireAuth, requirePerm('classes:read'), async (req, res) => {
+  const [classes, students, teachers, mats, staff] = await Promise.all(['classes', 'students', 'sectionTeachers', 'sectionMaterials', 'staff'].map((c) => find(c)));
+  const staffName = Object.fromEntries(staff.map((s) => [s.id, s.name]));
+  const keys = [...new Set([...classes.map((c) => c.classKey).filter(Boolean), ...students.map((s) => s.class)])].filter((k) => CLASS_LIST.includes(k)).sort((a, b) => classOrder(a) - classOrder(b));
+  const rows = keys.map((k) => {
+    const doc = classes.find((c) => c.classKey === k);
+    const secs = [...new Set([...(doc?.sections || []), ...students.filter((s) => s.class === k).map((s) => s.section || 'A'),
+      ...teachers.filter((t) => t.class === k).map((t) => t.section), ...mats.filter((m) => m.class === k).map((m) => m.section)])].filter(Boolean).sort();
+    return {
+      classKey: k, name: doc?.name || classDisplay(k), classId: doc?.id || null, level: doc?.level || levelOf(k),
+      sections: secs.map((sec) => {
+        const ct = teachers.find((t) => t.class === k && t.section === sec && t.isClassTeacher);
+        return {
+          section: sec,
+          students: students.filter((s) => s.class === k && (s.section || 'A') === sec).length,
+          teachers: teachers.filter((t) => t.class === k && t.section === sec).length,
+          materials: mats.filter((m) => m.class === k && m.section === sec).length,
+          classTeacher: ct ? staffName[ct.teacherId] || null : null,
+        };
+      }),
+    };
+  });
+  res.json({ rows, allClasses: CLASS_LIST, allSections: SECTIONS });
+});
+
+api.post('/sections', requireAuth, requirePerm('classes:write'), async (req, res) => {
+  const classKey = String(req.body?.classKey || ''); const section = String(req.body?.section || '').toUpperCase();
+  if (!CLASS_LIST.includes(classKey)) throw new HttpError(400, 'Choose a valid class');
+  if (!SECTIONS.includes(section)) throw new HttpError(400, `Section must be one of ${SECTIONS.join(', ')}`);
+  const doc = await classDoc(classKey);
+  if (doc) {
+    if ((doc.sections || []).includes(section)) throw new HttpError(409, `${classDisplay(classKey)}-${section} already exists`);
+    await upsert('classes', { id: doc.id }, { sections: [...(doc.sections || []), section].sort(), updatedAt: new Date() }, { insert: false });
+  } else {
+    await insertOne('classes', { id: newId(), classKey, name: classDisplay(classKey), level: levelOf(classKey), sections: [section], order: classOrder(classKey), createdAt: new Date() });
+  }
+  await upsert('meta', { key: 'adminEdited:classes' }, { at: new Date() });
+  await logActivity(req, 'create', 'Sections', `${classKey}-${section}`, `Added section ${section} to ${classDisplay(classKey)}`);
+  res.status(201).json({ ok: true });
+});
+
+api.delete('/sections/:classKey/:section', requireAuth, requirePerm('classes:write'), async (req, res) => {
+  const { classKey, section } = req.params;
+  const [st, te, ma] = await Promise.all([
+    find('students', { class: classKey }).then((r) => r.filter((s) => (s.section || 'A') === section).length),
+    find('sectionTeachers', { class: classKey, section }).then((r) => r.length),
+    find('sectionMaterials', { class: classKey, section }).then((r) => r.length),
+  ]);
+  if (st || te || ma) throw new HttpError(400, `Move or remove its ${st} students, ${te} teacher assignments and ${ma} materials first`);
+  const doc = await classDoc(classKey);
+  if (doc) await upsert('classes', { id: doc.id }, { sections: (doc.sections || []).filter((s) => s !== section), updatedAt: new Date() }, { insert: false });
+  await logActivity(req, 'delete', 'Sections', `${classKey}-${section}`, `Removed section ${section} from ${classDisplay(classKey)}`);
+  res.json({ ok: true });
+});
+
+// Move one or more students to another section of the same class
+api.post('/sections/move-students', requireAuth, requirePerm('students:write'), async (req, res) => {
+  const ids = Array.isArray(req.body?.studentIds) ? req.body.studentIds.map(String).slice(0, 500) : [];
+  const toSection = String(req.body?.toSection || '').toUpperCase();
+  if (!ids.length) throw new HttpError(400, 'Choose at least one student');
+  if (!SECTIONS.includes(toSection)) throw new HttpError(400, 'Choose a valid section');
+  let moved = 0;
+  for (const id of ids) if (await upsert('students', { id }, { section: toSection, updatedAt: new Date(), updatedBy: req.user.email }, { insert: false })) moved++;
+  await logActivity(req, 'update', 'Students', ids.length === 1 ? ids[0] : `${ids.length} students`, `Moved ${moved} student(s) to section ${toSection}`);
+  res.json({ moved });
+});
+
 // Generic CRUD for every other section
 mountCrud(api, { requireAuth, requirePerm });
 
@@ -339,6 +423,7 @@ app.use('/api', api);
 
 // ---------- first run: default roles, Super Admin, ids for old data ----------
 async function bootstrap() {
+  if (IS_PROD && (await source()) !== 'mongodb') { console.warn('[admin] MongoDB not connected - skipping setup (the API answers 503 until it is).'); return; }
   for (const r of DEFAULT_ROLES) if (!(await find('adminRoles', { id: r.id })).length) await insertOne('adminRoles', { ...r, createdAt: new Date() });
   if (!(await find('adminUsers')).length) {
     const email = String(process.env.SUPER_ADMIN_EMAIL || '').trim().toLowerCase();
@@ -349,6 +434,14 @@ async function bootstrap() {
       await insertOne('adminUsers', { id: newId(), name: 'Super Admin', email, roleId: 'super_admin', active: true, passwordHash: hashPassword(password), mustChangePassword: true, tokenVersion: 0, createdAt: new Date(), createdBy: 'setup' });
       await insertOne('activityLogs', { id: newId(), at: new Date(), actorName: 'system', action: 'create', entity: 'Admin Users', entityKey: email, summary: 'Super Admin created on first start', ip: '' });
       console.log(`[admin] Super Admin created: ${email} (you will be asked to change the password on first login)`);
+    }
+  }
+  // Classes: create one record per class (with the sections its students already use) the first time
+  if (!(await find('classes')).length) {
+    const students = await find('students');
+    for (const k of CLASS_LIST) {
+      const secs = [...new Set(students.filter((s) => s.class === k).map((s) => s.section || 'A'))].sort();
+      await insertOne('classes', { id: newId(), classKey: k, name: /^\d+$/.test(k) ? `Class ${k}` : k, level: CLASS_LIST.indexOf(k) <= CLASS_LIST.indexOf('8') ? 'Play School - 8' : '9 - 12', sections: secs.length ? secs : ['A'], order: CLASS_LIST.indexOf(k), createdAt: new Date() });
     }
   }
   // Older doubts / test results have no id - give them one so they can be managed

@@ -36,6 +36,7 @@ function cleanValue(name, def, v) {
       const s = String(v).trim();
       if (s.length > (def.max || 200)) bad(`must be at most ${def.max || 200} characters`);
       if (def.format === 'email' && s && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) bad('is not a valid email');
+      if (def.format === 'url' && s && !/^https?:\/\/[^\s]+$/i.test(s)) bad('must start with http:// or https://');
       return s;
     }
     case 'number': {
@@ -166,6 +167,7 @@ export function mountCrud(router, { requireAuth, requirePerm }) {
     const keyFilter = Object.fromEntries(cfg.keyFields.map((f) => [f, doc[f]]));
     if (cfg.keyFields.some((f) => doc[f] === undefined || doc[f] === '' || doc[f] === null)) throw new HttpError(400, `${cfg.keyFields.join(', ')} required`);
     if ((await find(cfg.collection, keyFilter)).length) throw new HttpError(409, 'An item with the same key already exists');
+    for (const f of cfg.unique || []) if ((await find(cfg.collection, { [f]: doc[f] })).length) throw new HttpError(409, `${cfg.fields[f]?.label || f} "${doc[f]}" already exists`);
     await insertOne(cfg.collection, { ...doc, createdAt: doc.createdAt || new Date(), createdBy: req.user.email });
     await markEdited(cfg);
     await logActivity(req, 'create', cfg.label, Object.values(keyFilter).join(' / '), doc.name || doc.title || doc.chapterName || doc.unitName || doc.question || '');

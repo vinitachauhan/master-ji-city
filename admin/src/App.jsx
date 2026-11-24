@@ -7,6 +7,7 @@ import { Login, ChangePassword, Account } from './pages/Auth';
 import { Dashboard, Reports } from './pages/Dashboard';
 import { Users, Roles, Settings } from './pages/Access';
 import { Materials, Tests } from './pages/Tabs';
+import Sections from './pages/Sections';
 
 function Guard({ perm, children }) {
   const { can } = useAuth();
@@ -18,7 +19,7 @@ const resourceRoutes = [
   ['students', 'students', 'Students', 'All students (the website’s School section uses the same list).'],
   ['teachers', 'teachers', 'Teachers & Staff', 'Teachers, staff and managers with their salaries.'],
   ['schools', 'schools', 'Schools', 'Schools and branches using Master Ji.'],
-  ['classes', 'classes', 'Classes', 'Classes and their sections.'],
+  ['classes', 'classes', 'Class details', 'Name, level, display order and in-charge of each class. Manage sections in Classes & Sections.'],
   ['subjects', 'subjects', 'Subjects', 'Subjects offered at each level.'],
   ['doubts', 'doubts', 'Doubts', 'Questions students asked the AI Doubt Solver. Review and correct answers here.'],
   ['certificates', 'certificates', 'Certificates', 'Topper certificates. Delete to revoke; add to issue one manually.'],
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="settings" element={<Guard perm="settings:read"><Settings /></Guard>} />
         <Route path="materials" element={<Guard perm="materials:read"><Materials /></Guard>} />
         <Route path="tests" element={<Guard perm="tests:read"><Tests /></Guard>} />
+        <Route path="sections" element={<Guard perm="classes:read"><Sections /></Guard>} />
         {resourceRoutes.map(([path, res, title, subtitle]) => (
           <Route key={path} path={path} element={<Guard perm={`${meta.resources[res].perm}:read`}><ResourcePage resource={res} title={title} subtitle={subtitle} /></Guard>} />
         ))}

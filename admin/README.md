@@ -12,7 +12,9 @@ npm run dev          # http://localhost:5050
 
 Or from the website folder: `npm run admin`.
 
-**Production:** `npm run build` then `npm start` (serves the built app + API on `ADMIN_PORT`). `ADMIN_JWT_SECRET` must be set.
+**Production:** `npm run build` then `npm start` (serves the built app + API on `ADMIN_PORT`). `ADMIN_JWT_SECRET` and `MONGODB_URI` must be set - in production the API answers 503 instead of running on temporary data.
+
+**Hosting:** the panel is a Node.js server, so it needs a host that runs one (Render, Railway, a VPS...) plus a MongoDB Atlas database shared with the website. Start command: `npm --prefix admin install && npm --prefix admin run build && npm --prefix admin start` from the repository root.
 
 ## First login
 
@@ -32,7 +34,8 @@ Settings are read from the website's `.env.local`:
 | Dashboard | Key numbers, today's attendance, doubts this week, recent activity |
 | Reports | Mock-test averages by subject, test counts by class, recommended streams, doubts per day, attendance %, fees, star leaderboard |
 | Students / Teachers & Staff | Full CRUD - same records as the website's School section (deleting a student also removes their attendance, fees and meetings) |
-| Schools / Classes / Subjects | Full CRUD |
+| Classes & Sections | Every class divided into Section A, B, C… Pick a class and a section to manage **that section's own students** (add, edit, move between sections), **teachers** (class teacher + subject teachers) and **study materials** (notes, homework, worksheets, links with due dates). Add sections; remove a section once it is empty. |
+| Schools / Class details / Subjects | Full CRUD |
 | Study Materials | Edit every chapter on the website: notes, examples, practice questions and the **MCQ test editor** (Play School-8, Class 9-12, College) |
 | Tests & Results | Best Subject Test questions (CRUD), Mock Test and Best Subject results (view / delete) |
 | Doubts | Read students' doubts, correct the answer, mark as reviewed |
