@@ -8,7 +8,9 @@
     "start": "next start",
     "seed": "node scripts/seed.mjs",
     "admin": "npm --prefix admin run dev",
-    "admin:build": "npm --prefix admin run build"
+    "admin:build": "npm --prefix admin run build",
+    "check": "node scripts/check.mjs",
+    "check:live": "node scripts/check-live.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "1.12.0",
