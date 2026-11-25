@@ -7,7 +7,7 @@ const get = async (p) => { const r = await fetch(U + p); let d = {}; try { d = a
 const post = async (p, body) => { const r = await fetch(U + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); let d = {}; try { d = await r.json(); } catch {} return [r.status, d]; };
 
 console.log(`Checking ${U}\n# Pages`);
-for (const p of ['/', '/study-1-8', '/study-9-12', '/study-9-12/study', '/study-9-12/best-subject', '/study-9-12/stream', '/college-study', '/college-study/guide', '/doubt', '/mock-test', '/certificate', '/school', '/computer-lab', '/computer-course', '/computer-course/lesson?m=python&l=0', '/react-course', '/react-course/lesson?m=state&l=0', '/study-1-8/chapter?class=5&subject=Maths&no=1', '/study-9-12/chapter?class=10&subject=Science&no=1', '/college-study/unit?course=Cooking%20Classes&sem=1&subject=East%20India%20Recipes&unit=1']) {
+for (const p of ['/', '/study-1-8', '/study-9-12', '/study-9-12/study', '/study-9-12/best-subject', '/study-9-12/stream', '/college-study', '/college-study/guide', '/doubt', '/mock-test', '/certificate', '/school', '/computer-lab', '/computer-course', '/computer-course/lesson?m=python&l=0', '/react-course', '/react-course/lesson?m=state&l=0', '/study-1-8/chapter?class=5&subject=Maths&no=1', '/study-9-12/chapter?class=10&subject=Science&no=1', '/college-study/unit?course=Cooking%20Classes&sem=1&subject=East%20India%20Recipes&unit=1', '/study-1-8/subjects?class=5', '/study-1-8/chapters?class=5&subject=Maths', '/study-1-8/topic?class=5&subject=Maths&no=1&t=1', '/study-9-12/subjects?class=10', '/study-9-12/chapters?class=10&subject=Science', '/study-9-12/topic?class=10&subject=Science&no=1&t=1', '/college-study/subjects?course=B.Tech&sem=1', '/college-study/units?course=B.Tech&sem=1&subject=Maths', '/college-study/topic?course=B.Tech&sem=1&subject=Maths&unit=1&t=1', '/computer-course/module?m=python', '/react-course/module?m=state']) {
   const r = await fetch(U + p); ok(r.status === 200, `${p} → ${r.status}`);
 }
 
@@ -15,9 +15,9 @@ console.log('# Study content');
 let [s, d] = await get('/api/study-1-8?class=Play%20School&subject=Hindi');
 ok(s === 200 && d.chapters?.length >= 5 && d.chapters.every((c) => c.testQuestions.length === 10), `Play School Hindi: ${d.chapters?.length} chapters, 10 questions each (data: ${d.source})`);
 [s, d] = await get('/api/study-9-12?class=10&subject=Science');
-ok(s === 200 && d.chapters?.length >= 10, `Class 10 Science: ${d.chapters?.length} chapters`);
+ok(s === 200 && d.chapters?.length >= 10 && d.chapters.every((c) => c.topics?.length >= 3), `Class 10 Science: ${d.chapters?.length} chapters, each with topics`);
 [s, d] = await get('/api/college-study?course=B.Tech&semester=1&subject=Maths');
-ok(s === 200 && d.units?.length >= 4, 'College units');
+ok(s === 200 && d.units?.length >= 4 && d.units.every((u) => u.topics?.length >= 1), 'College units with topics');
 [s, d] = await get('/api/jobs?stream=PCM');
 ok(s === 200 && d.jobs?.length > 0, `Jobs: ${d.jobs?.length}`);
 

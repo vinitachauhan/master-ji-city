@@ -31,6 +31,19 @@ const keys = new Set();
 for (const d of seed.study_1_8) { const k = `${d.class}|${d.subject}|${d.chapterNo}`; if (keys.has(k)) fail(`duplicate chapter ${k}`); keys.add(k); }
 pass(`${seed.collegeStudy.length} college units, ${seed.aptitudeQuestions.length} aptitude questions, ${seed.jobs.length} jobs`);
 
+// Topics: every chapter / unit is split into topics (each topic has its own page); textbook topics must match a real chapter
+const { topics18, topics912, topicsCollege } = await import('../lib/topics.mjs');
+const { TOPICS_18 } = await import('../lib/data/topics/topics18.mjs');
+const { TOPICS_912 } = await import('../lib/data/topics/topics912.mjs');
+const allTopics = [...seed.study_1_8.map(topics18), ...seed.study_9_12.map(topics912), ...seed.collegeStudy.map(topicsCollege)];
+const badTopics = allTopics.filter((t) => !t.length || t.some((x) => !x.title || !x.text)).length;
+const normName = (x) => String(x).toLowerCase().replace(/[’'?!.,()]/g, '').replace(/\s+/g, ' ').trim();
+const chapterKeys = new Set(chapters.map((d) => `${d.class}|${normName(d.chapterName)}`));
+const orphan = Object.entries({ ...TOPICS_18, ...TOPICS_912 }).flatMap(([c, ch]) => Object.keys(ch).filter((n) => !chapterKeys.has(`${c}|${normName(n)}`)).map((n) => `${c} ${n}`));
+if (badTopics) fail(`${badTopics} chapters / units without proper topics`);
+if (orphan.length) fail(`textbook topics for chapters that do not exist: ${orphan.join(', ')}`);
+if (!badTopics && !orphan.length) pass(`${allTopics.reduce((a, t) => a + t.length, 0)} topics in ${allTopics.length} chapters / units, each topic with a title and text`);
+
 // Computer Course: every module has lessons and a valid quiz
 const { COMPUTER_COURSE } = await import('../lib/data/computerCourse.mjs');
 const { REACT_COURSE } = await import('../lib/data/reactCourse.mjs');

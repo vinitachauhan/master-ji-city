@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { find } from '@/lib/db.mjs';
 import { COURSE_JOBS } from '@/lib/data/college.mjs';
+import { topicsCollege } from '@/lib/topics.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,6 @@ export async function GET(req) {
     subjectTitle: units[0]?.subjectTitle || subject,
     studyPlan: units[0]?.studyPlan || null,
     jobs: units[0]?.jobs || COURSE_JOBS[course] || null,
-    units,
+    units: units.map((u) => ({ ...u, topics: u.topics?.length ? u.topics : topicsCollege(u) })),
   });
 }

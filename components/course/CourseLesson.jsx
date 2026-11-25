@@ -42,7 +42,7 @@ export default function CourseLesson({ config }) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 text-white">
       <div className={`mx-auto px-4 py-6 ${lesson.code ? 'max-w-6xl' : 'max-w-4xl'}`}>
-        <Link href={`${base}?m=${mod.id}`} className="text-sm font-semibold text-sky-300">← {mod.emoji} {mod.title} - all lessons</Link>
+        <Link href={`${base}/module?m=${mod.id}`} className="text-sm font-semibold text-sky-300">← {mod.emoji} {mod.title} - all lessons</Link>
         <p className="mt-4 text-sm text-sky-200">Module {mi + 1} · Lesson {pos.l + 1} of {mod.lessons.length}</p>
         <h1 className="text-3xl font-extrabold sm:text-4xl">{done ? '✅ ' : ''}{lesson.title}</h1>
 
@@ -77,7 +77,7 @@ export default function CourseLesson({ config }) {
         <div className="mt-5 flex flex-wrap justify-between gap-2">
           <button disabled={at <= 0} onClick={() => go(all[at - 1])} className="rounded-full bg-white/10 px-5 py-2 font-bold disabled:opacity-40">← Previous lesson</button>
           {isLastInModule
-            ? <Link href={`${base}?m=${mod.id}&quiz=1`} className="rounded-full bg-sky-400 px-5 py-2 font-bold text-slate-900">Take the {mod.title} quiz 📝</Link>
+            ? <Link href={`${base}/module?m=${mod.id}&quiz=1`} className="rounded-full bg-sky-400 px-5 py-2 font-bold text-slate-900">Take the {mod.title} quiz 📝</Link>
             : <button onClick={() => go(all[at + 1])} className="rounded-full bg-sky-400 px-5 py-2 font-bold text-slate-900">Next lesson →</button>}
         </div>
       </div>

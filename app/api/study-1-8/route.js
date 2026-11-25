@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { find, source } from '@/lib/db.mjs';
+import { topics18 } from '@/lib/topics.mjs';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,5 +11,5 @@ export async function GET(req) {
   const subject = searchParams.get('subject');
   if (!cls || !subject) return NextResponse.json({ error: 'class and subject are required' }, { status: 400 });
   const chapters = await find('study_1_8', { class: cls, subject }, { sort: { chapterNo: 1 } });
-  return NextResponse.json({ class: cls, subject, source: await source(), chapters });
+  return NextResponse.json({ class: cls, subject, source: await source(), chapters: chapters.map((c) => ({ ...c, topics: c.topics?.length ? c.topics : topics18(c) })) });
 }
