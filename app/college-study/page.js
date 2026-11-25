@@ -104,6 +104,12 @@ export default function CollegeStudy() {
               ))}
             </div>
           )}
+          {course === 'Computer Courses' && (
+            <Link href="/computer-course" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-neon bg-neon/10 p-4">
+              <span><b className="text-neon">💻 Complete Computer Course</b> - learn everything step by step: 16 modules, practicals in the Computer Lab, quizzes and a certificate.</span>
+              <span className="rounded-full bg-neon px-4 py-1.5 font-bold text-navy-900">Start →</span>
+            </Link>
+          )}
           {course === 'B.Tech' && subjects.length > 0 && <p className="mt-2 text-xs text-slate-400">Semester 1 subjects are common to all branches - CSE, Mechanical, Civil and Electrical.</p>}
         </section>
 

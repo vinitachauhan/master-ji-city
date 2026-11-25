@@ -32,6 +32,7 @@ export default function RootLayout({ children }) {
                 <Link className="rounded-lg px-3 py-2 hover:bg-blue-50" href="/study-9-12">🧠 9th-12th</Link>
                 <Link className="rounded-lg px-3 py-2 hover:bg-green-50" href="/study-9-12/stream">🎯 Stream</Link>
                 <Link className="rounded-lg px-3 py-2 hover:bg-slate-100" href="/college-study">🎓 College</Link>
+                <Link className="rounded-lg px-3 py-2 hover:bg-violet-50" href="/computer-course">💻 Computer</Link>
                 <Link className="rounded-lg px-3 py-2 hover:bg-pink-50" href="/doubt">🤖 Doubt</Link>
                 <Link className="rounded-lg px-3 py-2 hover:bg-blue-50" href="/mock-test">📝 Mock Test</Link>
                 <Link className="rounded-lg px-3 py-2 hover:bg-yellow-100" href="/certificate">🏆 Certificate</Link>

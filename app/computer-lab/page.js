@@ -6,10 +6,13 @@ import PaintPad from '@/components/lab/PaintPad';
 import { Notepad, WordPad, store } from '@/components/lab/TextApps';
 import MiniExcel from '@/components/lab/MiniExcel';
 import { TypingTutor, CodePlayground } from '@/components/lab/CodeAndTyping';
+import dynamic from 'next/dynamic';
+
+const PythonPad = dynamic(() => import('@/components/lab/PythonPad'), { ssr: false });
 
 const TOOLS = [
   ['paint', '🎨', 'Paint'], ['notepad', '🗒️', 'Notepad'], ['wordpad', '📝', 'WordPad'],
-  ['excel', '📊', 'Excel'], ['typing', '⌨️', 'Typing'], ['code', '🌐', 'HTML & JS'],
+  ['excel', '📊', 'Excel'], ['typing', '⌨️', 'Typing'], ['code', '🌐', 'HTML & JS'], ['python', '🐍', 'Python'],
 ];
 
 // [tool, task]
@@ -20,11 +23,12 @@ const LEVELS = {
   'Class 1-2': [['paint', 'Draw your school with the Rectangle and Circle tools.'], ['notepad', 'Type 5 sentences about yourself and Save as "me.txt".'], ['typing', 'Finish the "Letters A to Z" lesson with 90% accuracy.'], ['wordpad', 'Type "My Family" and make the heading Bold and Red.'], ['paint', 'Draw the Indian flag and fill the colours.']],
   'Class 3-5': [['wordpad', 'Write a leave application. Centre the heading, use Bold and a List.'], ['wordpad', 'Insert a picture 🖼️ and write 3 lines about it.'], ['excel', 'Make a table of 5 friends’ names and their marks.'], ['excel', 'Use =SUM(B2:B6) to find the total marks.'], ['notepad', 'Use 🕒 Time/Date to write a diary entry.'], ['typing', 'Reach 15 WPM in the "Sentences" lesson.']],
   'Class 6-8': [['excel', 'Make a marksheet: Total with =B2+C2 and Average with =AVERAGE().'], ['excel', 'Use =IF(D2>=100,1,0) to mark pass (1) or fail (0); sort by Total.'], ['excel', 'Make a 📈 chart of the marks column.'], ['wordpad', 'Make a poster: big heading, colours, highlight and a picture. Save for Word.'], ['code', 'Run "My first page" and change the name to yours.'], ['code', 'Change the CSS colours in "Colours and style".'], ['typing', 'Reach 25 WPM in the "Paragraph" lesson.']],
-  'Class 9-12': [['excel', 'Make a monthly family budget: income, expenses, =SUM, savings = income - expenses.'], ['excel', 'Open a CSV file, sort it and save it again.'], ['code', 'Build a page with a table of your timetable.'], ['code', 'Change the calculator to also subtract, multiply and divide.'], ['code', 'Use a loop to print the table of any number typed by the user.'], ['wordpad', 'Write a formal letter with proper format and save it for Word.'], ['typing', 'Reach 35 WPM with 95% accuracy.']],
-  College: [['excel', 'Make a GST bill: Item, Qty, Rate, Amount = Qty × Rate, GST = 18% of total.'], ['excel', 'Make a salary sheet with Basic, HRA (=B2*0.2) and Total; chart the totals.'], ['code', 'Make your own resume web page with CSS styles and save it as .html.'], ['code', 'Make a JavaScript quiz with 3 questions and a score.'], ['wordpad', 'Write your resume (bio-data) with headings and lists.'], ['notepad', 'Write HTML in Notepad, save it as page.html and open it in a browser.'], ['typing', 'Reach 40 WPM - needed for data entry and government typing tests.']],
+  'Class 9-12': [['excel', 'Make a monthly family budget: income, expenses, =SUM, savings = income - expenses.'], ['excel', 'Open a CSV file, sort it and save it again.'], ['code', 'Build a page with a table of your timetable.'], ['code', 'Change the calculator to also subtract, multiply and divide.'], ['code', 'Use a loop to print the table of any number typed by the user.'], ['python', 'Run the Python "Grade calculator" and add a grade C for 45-59.'], ['python', 'Write a Python program for simple interest using input().'], ['wordpad', 'Write a formal letter with proper format and save it for Word.'], ['typing', 'Reach 35 WPM with 95% accuracy.']],
+  College: [['excel', 'Make a GST bill: Item, Qty, Rate, Amount = Qty × Rate, GST = 18% of total.'], ['excel', 'Make a salary sheet with Basic, HRA (=B2*0.2) and Total; chart the totals.'], ['code', 'Make your own resume web page with CSS styles and save it as .html.'], ['code', 'Make a JavaScript quiz with 3 questions and a score.'], ['python', 'Finish the Python "Guessing game" and add a score.'], ['wordpad', 'Write your resume (bio-data) with headings and lists.'], ['notepad', 'Write HTML in Notepad, save it as page.html and open it in a browser.'], ['typing', 'Reach 40 WPM - needed for data entry and government typing tests.']],
 };
 
 const COURSES = [
+  ['Complete Computer Course (16 modules)', '/computer-course', 'Step-by-step lessons, practicals, quizzes and a certificate'],
   ['Computer subject (Play School - Class 12)', '/study-1-8', 'Chapter notes, examples and 10-question tests'],
   ['DCA - Diploma in Computer Applications', '/college-study?course=Computer%20Courses', 'Windows, Notepad, WordPad, Word, Excel, PowerPoint, Internet'],
   ['Tally Prime with GST', '/college-study?course=Computer%20Courses', 'Accounting software for shops and offices'],
@@ -53,7 +57,11 @@ export default function ComputerLab() {
       <div className="mx-auto max-w-6xl px-4 py-6">
         <Link href="/" className="font-bold text-violet-700">← Home</Link>
         <h1 className="mt-2 text-3xl font-extrabold text-slate-900 sm:text-5xl">🖥️ Computer Lab - Learn by Doing</h1>
-        <p className="text-lg font-semibold text-violet-700">Paint · Notepad · WordPad · Excel · Typing · Coding - Play School to College. Everything works right here, no software needed.</p>
+        <p className="text-lg font-semibold text-violet-700">Paint · Notepad · WordPad · Excel · Typing · HTML · Python - Play School to College. Everything works right here, no software needed.</p>
+        <Link href="/computer-course" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-slate-900 p-4 text-white shadow-lg hover:bg-slate-800">
+          <span><b className="text-lg">💻 Complete Computer Course</b><span className="block text-sm text-slate-300">16 modules from basics to Python and jobs - lessons, quizzes and a certificate</span></span>
+          <span className="rounded-full bg-sky-400 px-4 py-1.5 font-bold text-slate-900">Start the course →</span>
+        </Link>
 
         {/* Level and tasks */}
         <section className="mt-5 rounded-3xl border-2 border-white bg-white/80 p-4 shadow-sm">
@@ -95,6 +103,7 @@ export default function ComputerLab() {
             {tool === 'excel' && <MiniExcel />}
             {tool === 'typing' && <TypingTutor startLesson={['Play School', 'Nursery'].includes(level) ? 'Home row (a s d f j k l ;)' : level === 'KG' ? 'Small words' : level === 'Class 1-2' ? 'Letters A to Z' : level === 'Class 3-5' ? 'Sentences' : 'Paragraph'} />}
             {tool === 'code' && <CodePlayground />}
+            {tool === 'python' && <PythonPad />}
           </div>
           <p className="mt-2 text-sm text-slate-600">💾 Your work is kept in this browser automatically. Use Save to download it as a real file (.png, .txt, .html, .doc, .csv) - it opens in MS Paint, Notepad, Word and Excel too.</p>
         </section>

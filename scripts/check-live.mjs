@@ -7,7 +7,7 @@ const get = async (p) => { const r = await fetch(U + p); let d = {}; try { d = a
 const post = async (p, body) => { const r = await fetch(U + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); let d = {}; try { d = await r.json(); } catch {} return [r.status, d]; };
 
 console.log(`Checking ${U}\n# Pages`);
-for (const p of ['/', '/study-1-8', '/study-9-12', '/study-9-12/study', '/study-9-12/best-subject', '/study-9-12/stream', '/college-study', '/college-study/guide', '/doubt', '/mock-test', '/certificate', '/school', '/computer-lab']) {
+for (const p of ['/', '/study-1-8', '/study-9-12', '/study-9-12/study', '/study-9-12/best-subject', '/study-9-12/stream', '/college-study', '/college-study/guide', '/doubt', '/mock-test', '/certificate', '/school', '/computer-lab', '/computer-course']) {
   const r = await fetch(U + p); ok(r.status === 200, `${p} → ${r.status}`);
 }
 

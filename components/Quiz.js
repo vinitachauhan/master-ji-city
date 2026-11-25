@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 // Chapter test - one question at a time. Answer → see right / wrong → Next. Summary at the end.
 // theme: 'kid' (Play School - Class 8) | 'study' (Class 9 - 12)
-export default function Quiz({ questions, onCorrect, theme = 'study', resetKey }) {
+export default function Quiz({ questions, onCorrect, onFinish, theme = 'study', resetKey }) {
   const [current, setCurrent] = useState(0);
   const [picked, setPicked] = useState({});
   const [finished, setFinished] = useState(false);
@@ -20,7 +20,10 @@ export default function Quiz({ questions, onCorrect, theme = 'study', resetKey }
     setPicked((p) => ({ ...p, [current]: opt }));
     if (opt === questions[current].correctAnswer) onCorrect?.();
   };
-  const next = () => (current + 1 < total ? setCurrent((c) => c + 1) : setFinished(true));
+  const next = () => {
+    if (current + 1 < total) return setCurrent((c) => c + 1);
+    setFinished(true); onFinish?.(score, total);
+  };
 
   // ---------- Summary ----------
   if (finished) {

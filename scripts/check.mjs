@@ -31,6 +31,16 @@ const keys = new Set();
 for (const d of seed.study_1_8) { const k = `${d.class}|${d.subject}|${d.chapterNo}`; if (keys.has(k)) fail(`duplicate chapter ${k}`); keys.add(k); }
 pass(`${seed.collegeStudy.length} college units, ${seed.aptitudeQuestions.length} aptitude questions, ${seed.jobs.length} jobs`);
 
+// Computer Course: every module has lessons and a valid quiz
+const { COMPUTER_COURSE } = await import('../lib/data/computerCourse.mjs');
+let badCourse = 0;
+for (const m of COMPUTER_COURSE) {
+  if (!m.lessons.length || m.quiz.length < 5) { badCourse++; fail(`Computer Course module ${m.id} is incomplete`); }
+  for (const q of m.quiz) if (q.length !== 5 || new Set(q.slice(1)).size !== 4) { badCourse++; fail(`bad quiz question in ${m.id}: ${q[0]}`); }
+  for (const l of m.lessons) if (!l.title || !l.learn || !l.steps.length || !l.practice || !l.lab) { badCourse++; fail(`incomplete lesson in ${m.id}: ${l.title}`); }
+}
+if (!badCourse) pass(`Computer Course: ${COMPUTER_COURSE.length} modules, ${COMPUTER_COURSE.reduce((a, m) => a + m.lessons.length, 0)} lessons, ${COMPUTER_COURSE.reduce((a, m) => a + m.quiz.length, 0)} quiz questions`);
+
 // ---------- 2 + 3. secrets ----------
 console.log('Secrets');
 const tracked = execSync('git ls-files --cached --others --exclude-standard', { encoding: 'utf8' }).split('\n').filter(Boolean);
