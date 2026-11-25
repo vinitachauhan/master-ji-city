@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
-import { branchFor } from '@/lib/data/college.mjs';
+import { branchFor, periodOf } from '@/lib/data/college.mjs';
 import { urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
 function CollegeUnits() {
@@ -27,7 +27,7 @@ function CollegeUnits() {
         ) : (
           <section className="mt-4 overflow-hidden rounded-2xl border border-white/15 bg-white text-slate-900">
             <div className="bg-navy-800 p-5 text-white">
-              <p className="text-sm text-neon">{course}{isCooking || course === 'Computer Courses' ? '' : ` · Semester ${sem}`}</p>
+              <p className="text-sm text-neon">{course}{isCooking || course === 'Computer Courses' ? '' : ` · ${periodOf(course)} ${sem} · ${subject}`}</p>
               <h1 className="text-2xl font-extrabold sm:text-3xl">{data.subjectTitle}</h1>
               <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
                 {TABS.map(([k, t]) => (

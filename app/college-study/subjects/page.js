@@ -2,7 +2,7 @@
 // College Step 2: semester and subjects of one course - /college-study/subjects?course=B.Tech&sem=1&branch=CSE
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { BRANCH_SUBJECTS, COURSES, READY_COURSES } from '@/lib/data/college.mjs';
+import { BRANCH_SUBJECTS, COURSES, READY_COURSES, baseSubject, periodOf } from '@/lib/data/college.mjs';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
 import { urlCollege } from '@/lib/collegeNav.mjs';
 
@@ -14,8 +14,13 @@ function CollegeSubjects() {
   const branch = info?.branches.includes(p.get('branch')) ? p.get('branch') : info?.branches[0] || '';
   const data = useJson(info ? urlCollege.api(course, sem) : null);
   const groupSubjects = BRANCH_SUBJECTS[course]?.[branch];
-  const subjects = (data?.subjects || []).filter((s) => !groupSubjects || groupSubjects.includes(s.subject));
+  const subjects = (data?.subjects || []).filter((s) => !groupSubjects || groupSubjects.includes(baseSubject(s.subject)));
   const single = (info?.semesters || 1) === 1;
+  const period = periodOf(course);
+  const short = period === 'Year' ? 'Year' : 'Sem';
+  // subjects with several books ("Maths - Book 1") are shown together under the subject name
+  const books = subjects.some((s) => s.subject.includes(' - Book '));
+  const groups = [...new Set(subjects.map((s) => baseSubject(s.subject)))].map((g) => [g, subjects.filter((s) => baseSubject(s.subject) === g)]);
 
   return (
     <main className="min-h-screen bg-navy-900 text-white">
@@ -24,7 +29,7 @@ function CollegeSubjects() {
         {!info ? <p className="mt-6">Course not found. <Link href={urlCollege.courses()} className="font-bold text-neon">Choose a course</Link></p> : (
           <>
             <h1 className="mt-3 text-3xl font-extrabold sm:text-5xl">{course}{branch ? <span className="text-neon"> · {branch}</span> : ''}</h1>
-            {groupSubjects && <p className="mt-2 text-slate-300">This group has {groupSubjects.length} subjects in every semester: <b className="text-white">{groupSubjects.join(' + ')}</b></p>}
+            {groupSubjects && <p className="mt-2 text-slate-300">This group has {groupSubjects.length} subjects in every {period.toLowerCase()}: <b className="text-white">{groupSubjects.join(' + ')}</b>{books ? ' - 3 books of each subject every year (9 books per subject in 3 years).' : ''}</p>}
             {info.branches.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {info.branches.map((b) => (
@@ -34,10 +39,10 @@ function CollegeSubjects() {
             )}
             {!single && (
               <section className="mt-5">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">2. Choose a semester</h2>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">2. Choose a {period.toLowerCase()}</h2>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {Array.from({ length: info.semesters }, (_, i) => i + 1).map((s) => (
-                    <Link key={s} href={urlCollege.subjects(course, s, branch)} className={`rounded-lg px-4 py-2 font-bold ${sem === s ? 'bg-neon text-navy-900' : 'border border-white/15 bg-navy-800 hover:border-neon/60'}`}>Sem {s}</Link>
+                    <Link key={s} href={urlCollege.subjects(course, s, branch)} className={`rounded-lg px-4 py-2 font-bold ${sem === s ? 'bg-neon text-navy-900' : 'border border-white/15 bg-navy-800 hover:border-neon/60'}`}>{short} {s}</Link>
                   ))}
                 </div>
               </section>
@@ -46,9 +51,27 @@ function CollegeSubjects() {
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">{single ? '2' : '3'}. Choose a subject</h2>
               {!data ? <p className="mt-2 text-slate-300">Loading...</p> : subjects.length === 0 ? (
                 <div className="mt-2 rounded-xl border border-white/15 bg-navy-800 p-5">
-                  <p className="font-semibold">⏳ {course}{branch ? ` (${branch})` : ''} - Semester {sem} data is being added soon.</p>
+                  <p className="font-semibold">⏳ {course}{branch ? ` (${branch})` : ''} - {period} {sem} data is being added soon.</p>
                   <p className="mt-1 text-slate-300">Ready now (Semester 1): {READY_COURSES.join(', ')}. More semesters can be added from the Admin Panel (College Study).</p>
                   {data.courseJobs && <p className="mt-3"><b className="text-neon">💼 {course} - jobs after this course:</b> {data.courseJobs}</p>}
+                </div>
+              ) : books ? (
+                <div className="mt-2 space-y-5">
+                  {groups.map(([g, list]) => (
+                    <div key={g}>
+                      <h3 className="text-xl font-extrabold text-neon">{g} <span className="text-sm font-semibold text-slate-400">· {short} {sem} · {list.length} books</span></h3>
+                      <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {list.map((s) => (
+                          <Link key={s.subject} href={urlCollege.units(course, sem, s.subject)}
+                            className="rounded-2xl border border-white/15 bg-navy-800 p-4 transition hover:-translate-y-0.5 hover:border-neon">
+                            <div className="text-sm font-bold uppercase tracking-wide text-slate-400">📘 {s.subject.split(' - ')[1]}</div>
+                            <div className="text-lg font-bold">{s.subjectTitle}</div>
+                            <div className="mt-2 text-sm font-bold text-neon">Open →</div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

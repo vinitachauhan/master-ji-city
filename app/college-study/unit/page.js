@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
-import { branchFor } from '@/lib/data/college.mjs';
+import { branchFor, periodOf } from '@/lib/data/college.mjs';
 import { LAB_FOR, urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
 function CollegeUnit() {
@@ -25,7 +25,7 @@ function CollegeUnit() {
           <p className="mt-6">Not found. <Link href={urlCollege.units(course, sem, subject)} className="font-bold text-neon">Open {subject}</Link></p>
         ) : (
           <>
-            <p className="mt-4 text-sm text-neon">{course}{isCooking ? '' : ` · Semester ${sem}`} · {data.subjectTitle} · {w.unit} {u.unitNo} of {units.length}</p>
+            <p className="mt-4 text-sm text-neon">{course}{isCooking ? '' : ` · ${periodOf(course)} ${sem} · ${subject}`} · {data.subjectTitle} · {w.unit} {u.unitNo} of {units.length}</p>
             <h1 className="text-2xl font-extrabold sm:text-4xl">{u.unitName}</h1>
 
             <section className="mt-5 rounded-2xl bg-white p-5 text-slate-900 sm:p-6">
