@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { speak } from '@/components/speech';
+import TopicDiagram from '@/components/study/TopicDiagram';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
 import { url912 } from '@/lib/study912Nav.mjs';
 
@@ -37,6 +38,7 @@ function Topic912() {
                 <p className="whitespace-pre-line">{topic.text}</p>
                 <button onClick={() => speak(`${topic.title}. ${topic.text}`)} className="mt-3 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white">🔊 Listen</button>
               </div>
+              <TopicDiagram theme="study" topic={topic} topics={ch.topics} current={t} chapterName={ch.chapterName} hrefFor={(i) => url912.topic(cls, subject, no, i)} />
               <div className="mt-4 flex flex-wrap justify-between gap-2">
                 {t > 1 ? <Link href={url912.topic(cls, subject, no, t - 1)} className="rounded-lg bg-white px-4 py-2 font-semibold shadow-sm">← Previous topic</Link> : <Link href={url912.chapter(cls, subject, no)} className="rounded-lg bg-white px-4 py-2 font-semibold shadow-sm">← All topics</Link>}
                 {t < total ? (
