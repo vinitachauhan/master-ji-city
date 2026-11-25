@@ -15,11 +15,15 @@ export default function ComputerCourse() {
   const { profile } = useProfile();
   const [progress, setProgress] = useState({ lessons: {}, quiz: {} });
   const [active, setActive] = useState(COMPUTER_COURSE[0].id);
-  const [open, setOpen] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [name, setName] = useState('');
 
-  useEffect(() => { const p = load(); setProgress({ lessons: p.lessons || {}, quiz: p.quiz || {} }); }, []);
+  useEffect(() => {
+    const p = load(); setProgress({ lessons: p.lessons || {}, quiz: p.quiz || {} });
+    // open a module (and its quiz) from the address, e.g. /computer-course?m=excel&quiz=1
+    const q = new URLSearchParams(window.location.search);
+    if (COMPUTER_COURSE.some((m) => m.id === q.get('m'))) { setActive(q.get('m')); setShowQuiz(q.get('quiz') === '1'); }
+  }, []);
   useEffect(() => { if (profile?.name && !name) setName(profile.name); }, [profile, name]);
   const update = (fn) => setProgress((p) => { const next = fn(p); save(next); return next; });
 
@@ -33,7 +37,7 @@ export default function ComputerCourse() {
   const avg = Math.round(COMPUTER_COURSE.reduce((a, m) => a + (progress.quiz[m.id] || 0), 0) / COMPUTER_COURSE.length);
   const totalHours = COMPUTER_COURSE.reduce((a, m) => a + m.hours, 0);
 
-  const pick = (id) => { setActive(id); setOpen(0); setShowQuiz(false); document.getElementById('module')?.scrollIntoView({ behavior: 'smooth' }); };
+  const pick = (id) => { setActive(id); setShowQuiz(false); window.history.replaceState(null, '', `/computer-course?m=${id}`); document.getElementById('module')?.scrollIntoView({ behavior: 'smooth' }); };
   const lessonKey = (i) => `${mod.id}|${i}`;
   const idx = COMPUTER_COURSE.findIndex((m) => m.id === active);
 
@@ -90,38 +94,17 @@ export default function ComputerCourse() {
           <div className="p-4 sm:p-6">
             {!showQuiz && (
               <div className="space-y-3">
+                <p className="text-sm text-slate-500">Click a lesson - it opens on its own page.</p>
                 {mod.lessons.map((l, i) => {
                   const done = !!progress.lessons[lessonKey(i)];
                   return (
-                    <div key={l.title} className={`rounded-2xl border ${done ? 'border-green-300' : 'border-slate-200'}`}>
-                      <button onClick={() => setOpen(open === i ? -1 : i)} className="flex w-full items-center justify-between gap-3 p-4 text-left">
-                        <span className="font-bold">{done ? '✅' : `${i + 1}.`} {l.title}</span><span className="text-slate-400">{open === i ? '−' : '+'}</span>
-                      </button>
-                      {open === i && (
-                        <div className="space-y-4 border-t border-slate-200 p-4">
-                          <p className="leading-relaxed">{l.learn}</p>
-                          <div className="rounded-xl bg-sky-50 p-4">
-                            <p className="font-bold text-sky-800">👣 Step by step</p>
-                            <ol className="mt-1 list-decimal space-y-1 pl-6 font-mono text-sm sm:text-base">{l.steps.map((s) => <li key={s} className="whitespace-pre-wrap">{s}</li>)}</ol>
-                          </div>
-                          {l.keys.length > 0 && (
-                            <div className="rounded-xl bg-amber-50 p-4">
-                              <p className="font-bold text-amber-800">⌨️ Shortcut keys</p>
-                              <div className="mt-2 flex flex-wrap gap-2">{l.keys.map(([k, w]) => <span key={k} className="rounded-lg border border-amber-200 bg-white px-2 py-1 text-sm"><kbd className="rounded bg-slate-800 px-1.5 py-0.5 font-mono text-xs text-white">{k}</kbd> {w}</span>)}</div>
-                            </div>
-                          )}
-                          <div className="rounded-xl border-2 border-green-300 bg-green-50 p-4">
-                            <p className="font-bold text-green-800">🖐️ Do it yourself</p>
-                            <p className="mt-1">{l.practice}</p>
-                            <div className="mt-3 flex flex-wrap gap-2">
-                              <Link href={`/computer-lab?tool=${l.lab}`} target="_blank" className="rounded-full bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700">Open {LAB_NAMES[l.lab]} in the Lab ↗</Link>
-                              <button onClick={() => { update((p) => ({ ...p, lessons: { ...p.lessons, [lessonKey(i)]: !done } })); if (!done && i + 1 < mod.lessons.length) setOpen(i + 1); }}
-                                className={`rounded-full px-4 py-2 text-sm font-bold ${done ? 'bg-slate-200' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}>{done ? '↩️ Mark as not done' : '✅ I have done it - next lesson'}</button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <Link key={l.title} href={`/computer-course/lesson?m=${mod.id}&l=${i}`}
+                      className={`flex items-center gap-3 rounded-2xl border p-4 transition hover:bg-slate-50 ${done ? 'border-green-300' : 'border-slate-200 hover:border-indigo-400'}`}>
+                      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-black ${done ? 'bg-green-500 text-white' : 'bg-indigo-100 text-indigo-800'}`}>{done ? '✓' : i + 1}</span>
+                      <span className="flex-1 font-bold">{l.title}</span>
+                      <span className="text-sm text-slate-500">{LAB_NAMES[l.lab]}</span>
+                      <span className="text-indigo-500">→</span>
+                    </Link>
                   );
                 })}
                 <div className="flex flex-wrap justify-between gap-2 pt-2">

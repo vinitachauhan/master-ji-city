@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { COURSES, READY_COURSES } from '@/lib/data/college.mjs';
 
@@ -18,16 +18,24 @@ export default function CollegeStudy() {
   const [subject, setSubject] = useState('');
   const [data, setData] = useState(null);
   const [tab, setTab] = useState('units');
-  const [openUnit, setOpenUnit] = useState(1);
+  const wantSubject = useRef(''); // subject from the address, chosen once the subject list arrives
 
   const info = COURSES.find((c) => c.course === course);
 
-  // open a course directly from a link, e.g. /college-study?course=Cooking%20Classes
+  // open a course / subject directly from a link, e.g. /college-study?course=Cooking%20Classes&subject=Baking%20and%20Cakes
+  // (Back from a unit page also returns here with the same subject open)
   useEffect(() => {
-    const c = new URLSearchParams(window.location.search).get('course');
-    const found = COURSES.find((x) => x.course === c);
+    const p = new URLSearchParams(window.location.search);
+    const found = COURSES.find((x) => x.course === p.get('course'));
     if (found) { setCourse(found.course); setBranch(found.branches[0] || ''); }
+    const sm = Number(p.get('sem'));
+    if (sm >= 1 && sm <= 8) setSem(sm);
+    wantSubject.current = p.get('subject') || '';
   }, []);
+  useEffect(() => {
+    const qs = new URLSearchParams({ course, sem: String(sem), ...(subject ? { subject } : {}) });
+    window.history.replaceState(null, '', `/college-study?${qs}`);
+  }, [course, sem, subject]);
   const isCooking = course === 'Cooking Classes';
   const tabs = isCooking ? COOK_TABS : course === 'Computer Courses' ? PRACTICAL_TABS : TABS;
 
@@ -35,13 +43,18 @@ export default function CollegeStudy() {
     setSubject(''); setData(null);
     let current = true; // ignore an older answer if the course was changed meanwhile
     fetch(`/api/college-study?course=${encodeURIComponent(course)}&semester=${sem}`)
-      .then((r) => r.json()).then((d) => { if (current) { setSubjects(d.subjects || []); setCourseJobs(d.courseJobs || ''); } });
+      .then((r) => r.json()).then((d) => {
+        if (!current) return;
+        setSubjects(d.subjects || []); setCourseJobs(d.courseJobs || '');
+        if (wantSubject.current && (d.subjects || []).some((x) => x.subject === wantSubject.current)) setSubject(wantSubject.current);
+        wantSubject.current = '';
+      });
     return () => { current = false; };
   }, [course, sem]);
 
   useEffect(() => {
     if (!subject) return;
-    setTab('units'); setOpenUnit(1);
+    setTab('units');
     fetch(`/api/college-study?course=${encodeURIComponent(course)}&semester=${sem}&subject=${encodeURIComponent(subject)}`)
       .then((r) => r.json()).then(setData);
   }, [course, sem, subject]);
@@ -128,13 +141,14 @@ export default function CollegeStudy() {
             <div className="p-5">
               {tab === 'units' && (
                 <div className="space-y-2">
+                  <p className="text-sm text-slate-500">Click a {isCooking ? 'recipe' : 'unit'} - it opens on its own page{isCooking ? ' in English and Hindi' : ''}.</p>
                   {data.units.map((u) => (
-                    <div key={u.unitNo} className="rounded-xl border border-slate-200">
-                      <button onClick={() => setOpenUnit(openUnit === u.unitNo ? 0 : u.unitNo)} className="flex w-full items-center justify-between p-4 text-left font-bold">
-                        {u.unitName} <span className="text-slate-400">{openUnit === u.unitNo ? '−' : '+'}</span>
-                      </button>
-                      {openUnit === u.unitNo && <p className="whitespace-pre-line border-t border-slate-200 bg-slate-50 p-4 leading-relaxed">{u.notes}</p>}
-                    </div>
+                    <Link key={u.unitNo} href={`/college-study/unit?${new URLSearchParams({ course, sem: String(sem), subject, unit: String(u.unitNo) })}`}
+                      className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 font-bold transition hover:border-navy-700 hover:bg-slate-50">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-navy-800 text-neon">{u.unitNo}</span>
+                      <span className="flex-1">{u.unitName}</span>
+                      <span className="text-slate-400">→</span>
+                    </Link>
                   ))}
                 </div>
               )}
