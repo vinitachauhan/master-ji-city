@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
+import { branchFor } from '@/lib/data/college.mjs';
 import { LAB_FOR, urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
 function CollegeUnit() {
@@ -19,7 +20,7 @@ function CollegeUnit() {
   return (
     <main className="min-h-screen bg-navy-900 text-white">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem)], [subject, urlCollege.units(course, sem, subject)], [`${w.unit} ${no}`]]} />
+        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem, branchFor(course, subject))], [subject, urlCollege.units(course, sem, subject)], [`${w.unit} ${no}`]]} />
         {!data ? <p className="mt-6 text-slate-300">Loading...</p> : !u ? (
           <p className="mt-6">Not found. <Link href={urlCollege.units(course, sem, subject)} className="font-bold text-neon">Open {subject}</Link></p>
         ) : (

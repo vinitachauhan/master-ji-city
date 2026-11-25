@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
+import { branchFor } from '@/lib/data/college.mjs';
 import TopicDiagram from '@/components/study/TopicDiagram';
 import { LAB_FOR, urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
@@ -22,7 +23,7 @@ function CollegeTopic() {
   return (
     <main className="min-h-screen bg-navy-900 text-white">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem)], [subject, urlCollege.units(course, sem, subject)], [`${w.unit} ${no}`, urlCollege.unit(course, sem, subject, no)], [`Topic ${t}`]]} />
+        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem, branchFor(course, subject))], [subject, urlCollege.units(course, sem, subject)], [`${w.unit} ${no}`, urlCollege.unit(course, sem, subject, no)], [`Topic ${t}`]]} />
         {!data ? <p className="mt-6 text-slate-300">Loading...</p> : !topic ? (
           <p className="mt-6">Topic not found. <Link href={urlCollege.unit(course, sem, subject, no)} className="font-bold text-neon">Open the {w.unit.toLowerCase()}</Link></p>
         ) : (

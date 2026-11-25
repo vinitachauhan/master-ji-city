@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
+import { branchFor } from '@/lib/data/college.mjs';
 import { urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
 function CollegeUnits() {
@@ -20,7 +21,7 @@ function CollegeUnits() {
   return (
     <main className="min-h-screen bg-navy-900 text-white">
       <div className="mx-auto max-w-6xl px-4 py-6">
-        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem)], [subject]]} />
+        <Crumbs className="text-neon" items={[['🏠 Home', '/'], ['College', urlCollege.courses()], [course, urlCollege.subjects(course, sem, branchFor(course, subject))], [subject]]} />
         {!data ? <p className="mt-6 text-slate-300">Loading...</p> : units.length === 0 ? (
           <p className="mt-6">Nothing found. <Link href={urlCollege.subjects(course, sem)} className="font-bold text-neon">Choose a subject</Link></p>
         ) : (

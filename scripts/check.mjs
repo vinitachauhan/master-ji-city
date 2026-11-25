@@ -35,7 +35,7 @@ pass(`${seed.collegeStudy.length} college units, ${seed.aptitudeQuestions.length
 const { topics18, topics912, topicsCollege } = await import('../lib/topics.mjs');
 const { TOPICS_18 } = await import('../lib/data/topics/topics18.mjs');
 const { TOPICS_912 } = await import('../lib/data/topics/topics912.mjs');
-const allTopics = [...seed.study_1_8.map(topics18), ...seed.study_9_12.map(topics912), ...seed.collegeStudy.map(topicsCollege)];
+const allTopics = [...seed.study_1_8.map(topics18), ...seed.study_9_12.map(topics912), ...seed.collegeStudy.map((u) => (u.topics?.length ? u.topics : topicsCollege(u)))];
 const badTopics = allTopics.filter((t) => !t.length || t.some((x) => !x.title || !x.text)).length;
 const normName = (x) => String(x).toLowerCase().replace(/[’'?!.,()]/g, '').replace(/\s+/g, ' ').trim();
 const chapterKeys = new Set(chapters.map((d) => `${d.class}|${normName(d.chapterName)}`));

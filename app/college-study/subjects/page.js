@@ -2,7 +2,7 @@
 // College Step 2: semester and subjects of one course - /college-study/subjects?course=B.Tech&sem=1&branch=CSE
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { COURSES, READY_COURSES } from '@/lib/data/college.mjs';
+import { BRANCH_SUBJECTS, COURSES, READY_COURSES } from '@/lib/data/college.mjs';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
 import { urlCollege } from '@/lib/collegeNav.mjs';
 
@@ -13,7 +13,8 @@ function CollegeSubjects() {
   const sem = Math.min(Math.max(1, Number(p.get('sem')) || 1), info?.semesters || 8);
   const branch = info?.branches.includes(p.get('branch')) ? p.get('branch') : info?.branches[0] || '';
   const data = useJson(info ? urlCollege.api(course, sem) : null);
-  const subjects = data?.subjects || [];
+  const groupSubjects = BRANCH_SUBJECTS[course]?.[branch];
+  const subjects = (data?.subjects || []).filter((s) => !groupSubjects || groupSubjects.includes(s.subject));
   const single = (info?.semesters || 1) === 1;
 
   return (
@@ -23,6 +24,7 @@ function CollegeSubjects() {
         {!info ? <p className="mt-6">Course not found. <Link href={urlCollege.courses()} className="font-bold text-neon">Choose a course</Link></p> : (
           <>
             <h1 className="mt-3 text-3xl font-extrabold sm:text-5xl">{course}{branch ? <span className="text-neon"> · {branch}</span> : ''}</h1>
+            {groupSubjects && <p className="mt-2 text-slate-300">This group has {groupSubjects.length} subjects in every semester: <b className="text-white">{groupSubjects.join(' + ')}</b></p>}
             {info.branches.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {info.branches.map((b) => (
