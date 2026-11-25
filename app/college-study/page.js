@@ -123,6 +123,12 @@ export default function CollegeStudy() {
               <span className="rounded-full bg-neon px-4 py-1.5 font-bold text-navy-900">Start →</span>
             </Link>
           )}
+          {course === 'Computer Courses' && (
+            <Link href="/react-course" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-400 bg-sky-400/10 p-4">
+              <span><b className="text-sky-300">⚛️ Complete React Course</b> - 15 modules, 50+ lessons with live React code you edit and run, quizzes and a certificate.</span>
+              <span className="rounded-full bg-sky-400 px-4 py-1.5 font-bold text-navy-900">Start →</span>
+            </Link>
+          )}
           {course === 'B.Tech' && subjects.length > 0 && <p className="mt-2 text-xs text-slate-400">Semester 1 subjects are common to all branches - CSE, Mechanical, Civil and Electrical.</p>}
         </section>
 

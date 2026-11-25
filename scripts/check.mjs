@@ -33,13 +33,16 @@ pass(`${seed.collegeStudy.length} college units, ${seed.aptitudeQuestions.length
 
 // Computer Course: every module has lessons and a valid quiz
 const { COMPUTER_COURSE } = await import('../lib/data/computerCourse.mjs');
+const { REACT_COURSE } = await import('../lib/data/reactCourse.mjs');
 let badCourse = 0;
-for (const m of COMPUTER_COURSE) {
+for (const l of REACT_COURSE.flatMap((m) => m.lessons)) if (!l.code || !/function App\s*\(/.test(l.code)) { badCourse++; fail(`React lesson without a runnable App: ${l.title}`); }
+for (const [name, mods] of [['Computer', COMPUTER_COURSE], ['React', REACT_COURSE]]) if (new Set(mods.map((m) => m.id)).size !== mods.length) { badCourse++; fail(`duplicate module id in ${name} course`); }
+for (const m of [...COMPUTER_COURSE, ...REACT_COURSE]) {
   if (!m.lessons.length || m.quiz.length < 5) { badCourse++; fail(`Computer Course module ${m.id} is incomplete`); }
   for (const q of m.quiz) if (q.length !== 5 || new Set(q.slice(1)).size !== 4) { badCourse++; fail(`bad quiz question in ${m.id}: ${q[0]}`); }
   for (const l of m.lessons) if (!l.title || !l.learn || !l.steps.length || !l.practice || !l.lab) { badCourse++; fail(`incomplete lesson in ${m.id}: ${l.title}`); }
 }
-if (!badCourse) pass(`Computer Course: ${COMPUTER_COURSE.length} modules, ${COMPUTER_COURSE.reduce((a, m) => a + m.lessons.length, 0)} lessons, ${COMPUTER_COURSE.reduce((a, m) => a + m.quiz.length, 0)} quiz questions`);
+if (!badCourse) for (const [name, mods] of [['Computer Course', COMPUTER_COURSE], ['React Course', REACT_COURSE]]) pass(`${name}: ${mods.length} modules, ${mods.reduce((a, m) => a + m.lessons.length, 0)} lessons, ${mods.reduce((a, m) => a + m.quiz.length, 0)} quiz questions`);
 
 // ---------- 2 + 3. secrets ----------
 console.log('Secrets');

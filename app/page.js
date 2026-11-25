@@ -53,6 +53,7 @@ export default function Home() {
       <section className="mt-4 grid gap-4 sm:grid-cols-2">
         {[
           ['/computer-course', '💻', 'Complete Computer Course', '16 modules: basics, MS Office, Internet, Tally, HTML, Python, AI + certificate', 'from-slate-900 to-indigo-700 text-white'],
+          ['/react-course', '⚛️', 'Complete React Course', '15 modules: JSX, hooks, APIs, Router, Redux, Next.js, projects - live code + certificate', 'from-sky-600 to-cyan-400 text-white'],
           ['/computer-lab', '🖥️', 'Computer Lab', 'Do it yourself: Paint, Notepad, WordPad, Excel, Typing, HTML, Python', 'from-violet-500 to-sky-500 text-white'],
           ['/study-1-8', '🎨', 'Drawing Classes', 'Play School to Class 8 - step-by-step drawing + draw on screen', 'from-rose-300 via-orange-200 to-yellow-200 text-slate-900'],
           ['/college-study?course=Cooking%20Classes', '🍳', 'Cooking Classes', 'Breakfast, North & South Indian, snacks, sweets, baking, Chinese, kids tiffin', 'from-orange-500 to-red-500 text-white'],

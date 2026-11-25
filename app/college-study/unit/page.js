@@ -62,6 +62,9 @@ export default function CollegeUnit() {
               ) : (
                 <div className={`whitespace-pre-line leading-relaxed ${lab ? 'rounded-xl bg-slate-900 p-4 font-mono text-sm text-green-200 sm:text-base' : ''}`}>{u.notes}</div>
               )}
+              {q.course === 'Computer Courses' && q.subject === 'React' && (
+                <Link href="/react-course" className="mr-2 mt-4 inline-block rounded-full bg-sky-600 px-5 py-2 font-bold text-white hover:bg-sky-700">⚛️ Learn step by step in the Complete React Course (live code + quiz + certificate) →</Link>
+              )}
               {lab && (
                 <Link href={`/computer-lab?tool=${lab}`} target="_blank" className="mt-4 inline-block rounded-full bg-green-600 px-5 py-2 font-bold text-white hover:bg-green-700">
                   ▶️ Type and run this code yourself in the Computer Lab ({lab === 'python' ? '🐍 Python' : lab === 'code' ? '🌐 HTML & JS' : '📊 Excel'}) ↗
