@@ -58,6 +58,7 @@ export default function SchoolPage() {
             <button onClick={() => { setPin(''); setAuthed(false); setPinInput(''); }} className="text-sm font-semibold text-slate-500 hover:text-slate-900">Lock 🔒</button>
           </div>
           <p className="text-sm text-slate-500">Attendance · Parent meetings · Salary · Fees · Activities</p>
+          <Link href="/super-admin/schools" className="mt-3 inline-block rounded-xl bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-700">🏫 All Schools - Gulaothi / Bulandshahr / Sikandrabad / Delhi / Lucknow / Dehradun →</Link>
           <nav className="no-scrollbar mt-4 flex gap-1 overflow-x-auto">
             {TABS.map(([k, l]) => (
               <button key={k} onClick={() => setTab(k)} className={`shrink-0 border-b-2 px-3 py-2 text-sm font-semibold ${tab === k ? 'border-indigo-600 text-indigo-700' : 'border-transparent text-slate-600 hover:text-slate-900'}`}>{l}</button>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Greeting from '@/components/Greeting';
+import SchoolFinder from '@/components/schools/SchoolFinder';
 
 const BUTTONS = [
   { href: '/study-1-8', emoji: '📚', title: 'Play School to Class 8', sub: 'COMPLETE Study', hint: 'Notes, Examples, Tests, Stars ⭐', cls: 'from-yellow-300 via-pink-300 to-sky-300 text-slate-900' },
@@ -66,6 +67,8 @@ export default function Home() {
           </Link>
         ))}
       </section>
+
+      <SchoolFinder />
 
       <Link href="/school" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-indigo-200 bg-white p-6 shadow-sm transition hover:border-indigo-500 hover:shadow-lg">
         <div>
