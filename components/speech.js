@@ -17,6 +17,21 @@ export function speak(text) {
   return true;
 }
 
+// Speak in a given language (e.g. 'ta-IN'). Returns false when this device has no voice for it.
+export function speakIn(text, lang) {
+  if (typeof window === 'undefined' || !window.speechSynthesis || !lang) return false;
+  const voices = window.speechSynthesis.getVoices();
+  const base = lang.split('-')[0];
+  const voice = voices.find((v) => v.lang === lang) || voices.find((v) => v.lang?.startsWith(base));
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = voice?.lang || lang;
+  if (voice) u.voice = voice;
+  u.rate = 0.85;
+  window.speechSynthesis.speak(u);
+  return !!voice;
+}
+
 export function getRecognizer() {
   if (typeof window === 'undefined') return null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;

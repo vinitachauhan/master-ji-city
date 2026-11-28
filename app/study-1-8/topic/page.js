@@ -7,6 +7,7 @@ import StarBank from '@/components/StarBank';
 import PictureCards from '@/components/PictureCards';
 import { speak } from '@/components/speech';
 import TopicDiagram from '@/components/study/TopicDiagram';
+import VideoLinks from '@/components/study/VideoLinks';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
 import { label18, url18 } from '@/lib/study18Nav.mjs';
 
@@ -40,6 +41,7 @@ function Topic18() {
                 <button onClick={() => speak(`${topic.title}. ${topic.text}`)} className="mt-3 rounded-full bg-pink-500 px-4 py-2 text-base font-bold text-white">🔊 Listen to Master Ji</button>
               </div>
               <TopicDiagram theme="kid" topic={topic} topics={ch.topics} current={t} chapterName={ch.chapterName} chapterPictures={ch.pictures || []} hrefFor={(i) => url18.topic(cls, subject, no, i)} />
+              <VideoLinks query={`${label18(cls)} ${subject} ${ch.chapterName}${topic.intro ? '' : ` ${topic.title}`}`} english={!['Hindi', 'Sanskrit'].includes(subject)} />
               {topic.intro && ch.pictures?.length > 0 && (
                 <div className="mt-6"><PictureCards pictures={ch.pictures} lang={['Hindi', 'Sanskrit'].includes(subject) ? 'hi' : 'en'} resetKey={`${cls}-${subject}-${no}`} /></div>
               )}

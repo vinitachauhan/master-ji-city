@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { Crumbs, useJson, withSuspense } from '@/components/study/common';
 import { branchFor } from '@/lib/data/college.mjs';
 import TopicDiagram from '@/components/study/TopicDiagram';
+import VideoLinks from '@/components/study/VideoLinks';
 import { LAB_FOR, urlCollege, wordsFor } from '@/lib/collegeNav.mjs';
 
 function CollegeTopic() {
@@ -49,6 +50,7 @@ function CollegeTopic() {
                 {lab && <Link href={`/computer-lab?tool=${lab}`} target="_blank" className="mt-4 inline-block rounded-full bg-green-600 px-5 py-2 font-bold text-white hover:bg-green-700">▶️ Type and run it yourself in the Computer Lab ↗</Link>}
               </div>
               <TopicDiagram theme="dark" topic={topic} topics={u.topics} current={t} chapterName={u.unitName.replace(/^(Unit|Recipe|Lesson) \d+\s*-\s*/, '')} hrefFor={(i) => urlCollege.topic(course, sem, subject, no, i)} />
+              <VideoLinks theme="dark" query={course === 'Cooking Classes' ? `${u.unitName.replace(/^Recipe \d+\s*-\s*/, '').replace(/\s*\(.*\)$/, '')} recipe` : `${subject} ${u.unitName.replace(/^(Unit|Lesson) \d+\s*-\s*/, '')} ${topic.title}`} />
               <div className="mt-4 flex flex-wrap justify-between gap-2">
                 {t > 1 ? <Link href={urlCollege.topic(course, sem, subject, no, t - 1)} className="rounded-full bg-white/10 px-5 py-2 font-bold">← Previous topic</Link> : <Link href={urlCollege.unit(course, sem, subject, no)} className="rounded-full bg-white/10 px-5 py-2 font-bold">← All topics</Link>}
                 {t < total ? (

@@ -57,6 +57,19 @@ for (const m of [...COMPUTER_COURSE, ...REACT_COURSE]) {
 }
 if (!badCourse) for (const [name, mods] of [['Computer Course', COMPUTER_COURSE], ['React Course', REACT_COURSE]]) pass(`${name}: ${mods.length} modules, ${mods.reduce((a, m) => a + m.lessons.length, 0)} lessons, ${mods.reduce((a, m) => a + m.quiz.length, 0)} quiz questions`);
 
+// States of India: every state has topics, a language that exists and a valid quiz; every language quiz is valid
+const st = await import('../lib/statesStudy.mjs');
+let badStates = 0;
+for (const s of st.STATES) {
+  if (st.stateTopics(s).some((t) => !t.title || !t.text) || !st.stateTopics(s).some((t) => t.title === 'School Activities' && t.text.includes('•')) || s.langs.some((c) => !st.LANGUAGES[c])) { badStates++; fail(`state ${s.name} is incomplete`); }
+  for (const q of st.stateQuiz(s)) if (q.options.length !== 4 || !q.options.includes(q.correctAnswer) || new Set(q.options).size !== 4) { badStates++; fail(`bad quiz question for ${s.name}: ${q.question}`); }
+}
+for (const [code, l] of Object.entries(st.LANGUAGES)) {
+  if (l.phrases.length !== st.PHRASES.length) { badStates++; fail(`language ${code} needs ${st.PHRASES.length} phrase slots`); }
+  for (const q of st.languageQuiz(code)) if (q.options.length !== 4 || !q.options.includes(q.correctAnswer)) { badStates++; fail(`bad ${code} quiz question`); }
+}
+if (!badStates) pass(`States of India: ${st.STATES.length} states / UTs, ${Object.keys(st.LANGUAGES).length} languages, quizzes valid`);
+
 // ---------- 2 + 3. secrets ----------
 console.log('Secrets');
 const tracked = execSync('git ls-files --cached --others --exclude-standard', { encoding: 'utf8' }).split('\n').filter(Boolean);

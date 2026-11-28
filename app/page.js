@@ -53,6 +53,7 @@ export default function Home() {
 
       <section className="mt-4 grid gap-4 sm:grid-cols-2">
         {[
+          ['/states', '🗺️', 'States of India + Languages', 'Study all 28 states and 8 UTs - history, culture, food, places - and learn 18 languages with words, numbers and quizzes', 'from-orange-500 via-amber-400 to-green-600 text-white'],
           ['/computer-course', '💻', 'Complete Computer Course', '16 modules: basics, MS Office, Internet, Tally, HTML, Python, AI + certificate', 'from-slate-900 to-indigo-700 text-white'],
           ['/react-course', '⚛️', 'Complete React Course', '15 modules: JSX, hooks, APIs, Router, Redux, Next.js, projects - live code + certificate', 'from-sky-600 to-cyan-400 text-white'],
           ['/computer-lab', '🖥️', 'Computer Lab', 'Do it yourself: Paint, Notepad, WordPad, Excel, Typing, HTML, Python', 'from-violet-500 to-sky-500 text-white'],
